@@ -996,27 +996,27 @@ main_game:
 		jne nextcmp4 ; no, chain to old ISR
 		jmp exit 
 	nextcmp4:
-		cmp al,0x39
+		cmp al,0x39 ; space bar
 		jne nextcmp5
 			mov byte[cs:StayOnStacker],0
 		jmp exit
 	nextcmp5:
-		cmp al,0xb9
+		cmp al,0xb9 ; has the space bar released
 		jne exitcmp
 		jmp exit
 		
 	exitcmp: 
-		cmp al,0x12
+		cmp al,0x12 ; has the E key released
 		jne quitcmp
 		mov byte[cs:end_game] , 1
 		jmp exit
 	quitcmp:
-		cmp al , 0x10
+		cmp al , 0x10 ; has the Q key released
 		jne restartcmp
 		mov byte[cs:quit] , 1
 		jmp exit
 	restartcmp:
-		cmp al , 0x13
+		cmp al , 0x13 ; has the R key released
 		jne nomatch
 		mov byte[cs:restart] , 1
 		jmp exit

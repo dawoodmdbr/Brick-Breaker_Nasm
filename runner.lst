@@ -1,0 +1,1353 @@
+     1                                  [org 0x0100]
+     2 00000000 E9B909                  jmp start
+     3                                  
+     4 00000003 00                      start_game: db 0
+     5                                  
+     6 00000004 505245535320492054-     inst: db 'PRESS I TO GO INTO INSTRUCTION BOX'
+     6 0000000D 4F20474F20494E544F-
+     6 00000016 20494E535452554354-
+     6 0000001F 494F4E20424F58     
+     7 00000026 00000000                oldisr: dd 0
+     8 0000002A 0000                    colume: dw 0
+     9 0000002C 0000                    row: dw 0
+    10 0000002E 00                      incC: db 0
+    11 0000002F 00                      incR: db 0
+    12 00000030 0000                    previous: dw 0
+    13 00000032 00                      tickcount: db 0
+    14 00000033 C40D                    left_edge: dw 3524
+    15 00000035 440E                    right_edge dw 3652
+    16 00000037 0000                    right_: dw 0
+    17 00000039 0000                    left_: dw 0
+    18 0000003B FC0D                    pre_stack_pos: dw 3580
+    19                                  
+    20 0000003D 0000                    second: dw 0
+    21 0000003F 00                      minute: db 0
+    22 00000040 00                      clock: db 0
+    23 00000041 0000                    bonus: dw 0
+    24                                  
+    25 00000043 2A033C034E03600372-     bricks_start_location: dw 810 , 828 , 846 , 864 , 882 , 900 , 918 , 936 , 1290 , 1308 , 1326 , 1344 , 1362, 1380, 1398 , 1416 , 1770 , 1788 , 1806 , 1824 , 1842 , 1860 , 1878 , 1896
+    25 0000004C 0384039603A8030A05-
+    25 00000055 1C052E054005520564-
+    25 0000005E 0576058805EA06FC06-
+    25 00000067 0E0720073207440756-
+    25 00000070 076807             
+    26 00000073 360348035A036C037E-     bricks_end_location: dw 822 , 840 , 858 , 876 , 894 , 912 , 930 , 948 , 1302 , 1320 , 1338 , 1356 , 1374 , 1392 , 1414 , 1428 , 1782 , 1800  , 1818 , 1836 ,1854 , 1872 , 1890 , 1908
+    26 0000007C 039003A203B4031605-
+    26 00000085 28053A054C055E0570-
+    26 0000008E 0586059405F6060807-
+    26 00000097 1A072C073E07500762-
+    26 000000A0 077407             
+    27                                  
+    28 000000A3 0000                    score: dw 0
+    29 000000A5 1800                    total_bricks: dw 24
+    30 000000A7 0000                    calculated_location:  dw 0
+    31 000000A9 0000                    left_limit dw 0
+    32 000000AB 0000                    right_limit dw 0
+    33 000000AD 0000                    mid dw 0
+    34 000000AF 00                      left_or_right: db 0
+    35 000000B0 0000                    preBall:dw 0
+    36                                  
+    37 000000B2 03                      live: db 3
+    38 000000B3 0000                    end_of_game: dw 0
+    39 000000B5 00                      StayOnStacker: db 0
+    40                                  
+    41 000000B6 0000                    counter: dw 0
+    42 000000B8 00                      solid: db 0
+    43 000000B9 00                      solid1: db 0
+    44                                  
+    45                                  
+    46                                  
+    47                                  
+    48 000000BA 594F555F4C4F5345        Lose_str: db 'YOU_LOSE'
+    49 000000C2 53434F5245              Score_str: db 'SCORE'
+    50 000000C7 4C49564553              Lives_str: db 'LIVES'
+    51                                  
+    52                                  ; welcome_str: db 'WELCOME TO BRICK BREAKER'
+    53                                  ; option_str: db 'PLEASE SELECT OPTIONS'
+    54                                  ; group_str: db '24F-3053 | 24F-3053'
+    55                                  ; instructions_str: db 'INSTRUCTION'
+    56                                  ; play_str: db 'PRESS ENTER TO PLAY GAME'
+    57                                  
+    58 000000CC 57454C434F4D452054-     welcome_str db "WELCOME TO BRICK BREAKER"
+    58 000000D5 4F20425249434B2042-
+    58 000000DE 5245414B4552       
+    59 000000E4 3234462D3330353320-     group_str: db '24F-3053 | 24F-3053'
+    59 000000ED 7C203234462D333035-
+    59 000000F6 33                 
+    60 000000F7 555345204152524F57-     instructions_str db "USE ARROW KEYS TO MOVE AND SPACE TO START"
+    60 00000100 204B45595320544F20-
+    60 00000109 4D4F564520414E4420-
+    60 00000112 535041434520544F20-
+    60 0000011B 5354415254         
+    61 00000120 505245535320454E54-     play_str    db "PRESS ENTER TO PLAY GAME"
+    61 00000129 455220544F20504C41-
+    61 00000132 592047414D45       
+    62                                  
+    63 00000138 594F555220544F5441-     ttl_live_str: db 'YOUR TOTAL LIVES ARE 3'
+    63 00000141 4C204C495645532041-
+    63 0000014A 52452033           
+    64 0000014E 424F4E555320415741-     bonus_note_str: db 'BONUS AWARDED IF BREAK ALL BRICKS IN 2 MINS' 
+    64 00000157 524445442049462042-
+    64 00000160 5245414B20414C4C20-
+    64 00000169 425249434B5320494E-
+    64 00000172 2032204D494E53     
+    65 00000179 48495454494E472052-     solid_base_str: db 'HITTING RED BRICK WILL SOLIDIFY YOUR BASE'
+    65 00000182 454420425249434B20-
+    65 0000018B 57494C4C20534F4C49-
+    65 00000194 4449465920594F5552-
+    65 0000019D 2042415345         
+    66                                  
+    67 000001A2 505245535320535041-     space_bar: db 'PRESS SPACE BAR TO RELEASE BALL'
+    67 000001AB 43452042415220544F-
+    67 000001B4 2052454C4541534520-
+    67 000001BD 42414C4C           
+    68                                  
+    69 000001C1 594F555220544F5441-     total_score_str: db 'YOUR TOTAL SCORES :'
+    69 000001CA 4C2053434F52455320-
+    69 000001D3 3A                 
+    70 000001D4 4C495645532052454D-     lives_remain_str: db 'LIVES REMAINING'
+    70 000001DD 41494E494E47       
+    71 000001E3 505245535320452054-     exit_str: db 'PRESS E TO EXIT'
+    71 000001EC 4F2045584954       
+    72 000001F2 505245535320454E54-     quit_str: db 'PRESS ENTER+Q TO QUIT GAME'
+    72 000001FB 45522B5120544F2051-
+    72 00000204 5549542047414D45   
+    73 0000020C 505245535320454E54-     restart_str: db 'PRESS ENTER+R TO RESTART YOUR GAME'
+    73 00000215 45522B5220544F2052-
+    73 0000021E 45535441525420594F-
+    73 00000227 55522047414D45     
+    74                                  
+    75 0000022E 555345205249474854-     left_arrow: db 'USE RIGHT & LEFT ARROW TO MOVE BAR'
+    75 00000237 2026204C4546542041-
+    75 00000240 52524F5720544F204D-
+    75 00000249 4F564520424152     
+    76                                  
+    77                                  sound:
+    78 00000250 50                      	push ax
+    79 00000251 53                      	push bx
+    80 00000252 B0B6                    	mov al,182
+    81 00000254 E643                    	out 43h,al
+    82 00000256 B8D011                  	mov ax, 4560
+    83 00000259 E642                    	out 42h,al
+    84 0000025B 88E0                    	mov al,ah
+    85 0000025D E642                    	out 42h,al
+    86 0000025F E461                    	in al,61h
+    87 00000261 0C0B                    	or al,00000011
+    88 00000263 E661                    	out 61h,al
+    89 00000265 BB0200                  	mov bx,2
+    90                                  	pre:
+    91 00000268 B9FFFF                  	mov cx,65535
+    92                                  	pre1:
+    93 0000026B 49                      	dec cx
+    94 0000026C 75FD                    	jne pre1
+    95 0000026E 4B                      	dec bx
+    96 0000026F 75F7                    	jne pre
+    97 00000271 E461                    	in al,61h
+    98 00000273 24FC                    	and AL,11111100b
+    99 00000275 E661                    	out 61h,al 
+   100 00000277 5B                      	pop bx
+   101 00000278 58                      	pop ax
+   102 00000279 C3                      	ret 
+   103                                  
+   104                                  
+   105                                  start_menu:
+   106 0000027A 50                      	push ax
+   107 0000027B E82001                  	call clrscr
+   108                                  	
+   109                                  	; mov ax , 690 + 160  ; row 6 col 25
+   110                                  	; push ax
+   111                                  	; mov ax ,welcome_str
+   112                                  	; push ax
+   113                                  	; mov ax , 24
+   114                                  	; push ax
+   115                                  	
+   116                                  	; call printstr
+   117                                  	
+   118                                  	
+   119                                  	; mov ax , 1010
+   120                                  	; push ax
+   121                                  	; mov ax , group_str
+   122                                  	; push ax
+   123                                  	; mov ax , 19
+   124                                  	; push ax
+   125                                  	
+   126                                  	; call printstr
+   127                                  	
+   128                                  	; mov ax , 1330
+   129                                  	; push ax
+   130                                  	; mov ax , inst
+   131                                  	; push ax
+   132                                  	; mov ax , 34
+   133                                  	; push ax
+   134                                  	; call printstr
+   135                                  	
+   136                                  	; mov ax , 1650
+   137                                  	; push ax
+   138                                  	; mov ax , play_str
+   139                                  	; push ax
+   140                                  	; mov ax , 24
+   141                                  	; push ax
+   142                                  	; call printstr_B
+   143                                  
+   144                                  
+   145                                  	; WELCOME (row 8, centered)
+   146 0000027E B83805                  	mov ax, 1336
+   147 00000281 50                      	push ax
+   148 00000282 B8[CC00]                	mov ax, welcome_str
+   149 00000285 50                      	push ax
+   150 00000286 B81800                  	mov ax, 24
+   151 00000289 50                      	push ax
+   152 0000028A E88000                  	call printstr
+   153                                  
+   154                                  	; GROUP (row 10, centered)
+   155 0000028D B87C06                  	mov ax, 1660
+   156 00000290 50                      	push ax
+   157 00000291 B8[E400]                	mov ax, group_str
+   158 00000294 50                      	push ax
+   159 00000295 B81300                  	mov ax, 19
+   160 00000298 50                      	push ax
+   161 00000299 E87100                  	call printstr
+   162                                  
+   163                                  	; INSTRUCTIONS (row 12, centered)
+   164 0000029C B8A807                  	mov ax, 1960
+   165 0000029F 50                      	push ax
+   166 000002A0 B8[F700]                	mov ax, instructions_str
+   167 000002A3 50                      	push ax
+   168 000002A4 B82900                  	mov ax, 41
+   169 000002A7 50                      	push ax
+   170 000002A8 E86200                  	call printstr
+   171                                  
+   172                                  	; PLAY (row 14, centered, using fancy printer)
+   173 000002AB B8F808                  	mov ax, 2296
+   174 000002AE 50                      	push ax
+   175 000002AF B8[2001]                	mov ax, play_str
+   176 000002B2 50                      	push ax
+   177 000002B3 B81800                  	mov ax, 24
+   178 000002B6 50                      	push ax
+   179 000002B7 E88100                  	call printstr_B
+   180                                  
+   181                                  	
+   182                                  	
+   183                                  	
+   184                                  	
+   185                                  	
+   186                                  	
+   187                                  	
+   188 000002BA 58                      	pop ax
+   189 000002BB C3                      	ret
+   190                                  	
+   191                                  printnum: 
+   192 000002BC 55                      push bp
+   193 000002BD 89E5                    mov bp, sp
+   194 000002BF 06                      push es
+   195 000002C0 50                      push ax
+   196 000002C1 53                      push bx
+   197 000002C2 51                      push cx
+   198 000002C3 52                      push dx
+   199 000002C4 57                      push di
+   200 000002C5 B800B8                  mov ax, 0xb800
+   201 000002C8 8EC0                    mov es, ax ; point es to video base
+   202 000002CA 8B4604                  mov ax, [bp+4] ; load number in ax
+   203 000002CD BB0A00                  mov bx, 10 ; use base 10 for division
+   204 000002D0 B90000                  mov cx, 0 ; initialize count of digits
+   205 000002D3 BA0000                  nextdigit: mov dx, 0 ; zero upper half of dividend
+   206 000002D6 F7F3                    div bx ; divide by 10
+   207 000002D8 80C230                  add dl, 0x30 ; convert digit into ascii value
+   208 000002DB 52                      push dx ; save ascii value on stack
+   209 000002DC 41                      inc cx ; increment count of values
+   210 000002DD 83F800                  cmp ax, 0 ; is the quotient zero
+   211 000002E0 75F1                    jnz nextdigit ; if no divide it again
+   212 000002E2 8B7E06                  mov di, [bp+6] ; point di to 70th column
+   213 000002E5 5A                      nextpos: pop dx ; remove a digit from the stack
+   214 000002E6 B607                    mov dh, 0x07 ; use normal attribute
+   215 000002E8 268915                  mov [es:di], dx ; print char on screen
+   216 000002EB 83C702                  add di, 2 ; move to next screen location
+   217 000002EE E2F5                    loop nextpos ; repeat for all digits on stack
+   218 000002F0 5F                      pop di
+   219 000002F1 5A                      pop dx
+   220 000002F2 59                      pop cx
+   221 000002F3 5B                      pop bx
+   222 000002F4 58                      pop ax
+   223                                  
+   224 000002F5 07                      pop es
+   225 000002F6 5D                      pop bp
+   226 000002F7 C20400                  ret 4
+   227                                  
+   228                                  
+   229                                  ; youLose:
+   230                                  	; push ax
+   231                                  	
+   232                                  	; ;call clrscr
+   233                                  	; mov ax , 1990
+   234                                  	; push ax
+   235                                  	; mov ax , Lose_str
+   236                                  	; push ax
+   237                                  	; mov ax , 8
+   238                                  	; push ax
+   239                                  	; call printstr
+   240                                  	
+   241                                  	; ;jmp endgame
+   242                                  	
+   243                                  	; pop ax
+   244                                  ; ret
+   245                                  
+   246                                  callmee:
+   247                                  	
+   248 000002FA B8C607                  	mov ax , 1990
+   249 000002FD 50                      	push ax
+   250 000002FE B8[BA00]                	mov ax , Lose_str
+   251 00000301 50                      	push ax
+   252 00000302 B80800                  	mov ax , 8
+   253 00000305 50                      	push ax
+   254 00000306 E80400                  	call printstr
+   255                                  	
+   256 00000309 EBEF                    	jmp callmee
+   257                                  	
+   258 0000030B 58                      	pop ax
+   259 0000030C C3                      ret
+   260                                  printstr:
+   261 0000030D 55                       push bp
+   262 0000030E 89E5                    mov bp, sp
+   263 00000310 06                      push es
+   264 00000311 50                      push ax
+   265 00000312 51                      push cx
+   266 00000313 56                      push si
+   267 00000314 57                      push di
+   268 00000315 B800B8                  mov ax, 0xb800
+   269 00000318 8EC0                    mov es, ax ; point es to video base
+   270 0000031A 8B7E08                  mov di, [bp+8] ; point di to top left column
+   271 0000031D 8B7606                  mov si, [bp+6] ; point si to string
+   272 00000320 8B4E04                  mov cx, [bp+4] ; load length of string in cx
+   273 00000323 B407                    mov ah, 0x07 ; normal attribute fixed in al
+   274                                  nextchar: 
+   275 00000325 8A04                    mov al, [si] ; load next char of string
+   276 00000327 268905                  mov [es:di], ax ; show this char on screen
+   277 0000032A 83C702                  add di, 2 ; move to next screen location
+   278 0000032D 83C601                  add si, 1 ; move to next char in string
+   279 00000330 E2F3                    loop nextchar ; repeat the operation cx times
+   280 00000332 5F                      pop di
+   281 00000333 5E                      pop si
+   282 00000334 59                      pop cx
+   283 00000335 58                      pop ax
+   284 00000336 07                      pop es
+   285 00000337 5D                      pop bp
+   286 00000338 C20600                  ret 6
+   287                                  
+   288                                  printstr_B:
+   289 0000033B 55                       push bp
+   290 0000033C 89E5                    mov bp, sp
+   291 0000033E 06                      push es
+   292 0000033F 50                      push ax
+   293 00000340 51                      push cx
+   294 00000341 56                      push si
+   295 00000342 57                      push di
+   296 00000343 B800B8                  mov ax, 0xb800
+   297 00000346 8EC0                    mov es, ax ; point es to video base
+   298 00000348 8B7E08                  mov di, [bp+8] ; point di to top left column
+   299 0000034B 8B7606                  mov si, [bp+6] ; point si to string
+   300 0000034E 8B4E04                  mov cx, [bp+4] ; load length of string in cx
+   301 00000351 B48E                    mov ah, 0x8e ; normal attribute fixed in al
+   302                                  nextchar1: 
+   303 00000353 8A04                    mov al, [si] ; load next char of string
+   304 00000355 268905                  mov [es:di], ax ; show this char on screen
+   305 00000358 83C702                  add di, 2 ; move to next screen location
+   306 0000035B 83C601                  add si, 1 ; move to next char in string
+   307 0000035E E2F3                    loop nextchar1 ; repeat the operation cx times
+   308 00000360 5F                      pop di
+   309 00000361 5E                      pop si
+   310 00000362 59                      pop cx
+   311 00000363 58                      pop ax
+   312 00000364 07                      pop es
+   313 00000365 5D                      pop bp
+   314 00000366 C20600                  ret 6
+   315                                  
+   316 00000369 54494D4520              time_str: db 'TIME '
+   317                                  printStrings:
+   318 0000036E 50                      	push ax
+   319                                  		
+   320 0000036F B8A200                  	mov ax , 162
+   321 00000372 50                      	push ax
+   322 00000373 B8[C200]                	mov ax , Score_str
+   323 00000376 50                      	push ax
+   324 00000377 B80500                  	mov ax , 5
+   325 0000037A 50                      	push ax
+   326 0000037B E88FFF                  	call printstr
+   327                                  	
+   328 0000037E B8E600                  	mov ax , 230
+   329 00000381 50                      	push ax
+   330 00000382 B8[6903]                	mov ax , time_str
+   331 00000385 50                      	push ax
+   332 00000386 B80500                  	mov ax , 5
+   333 00000389 50                      	push ax
+   334 0000038A E880FF                  	call printstr
+   335                                  
+   336 0000038D B81801                  	mov ax , 280
+   337 00000390 50                      	push ax
+   338 00000391 B8[C700]                	mov ax , Lives_str
+   339 00000394 50                      	push ax
+   340 00000395 B80500                  	mov ax , 5
+   341 00000398 50                      	push ax
+   342 00000399 E871FF                  	call printstr
+   343                                  	
+   344 0000039C 58                      	pop ax
+   345 0000039D C3                      ret
+   346                                  clrscr: 
+   347 0000039E 06                      	push es
+   348 0000039F 50                      	push ax
+   349 000003A0 51                      	push cx
+   350 000003A1 57                      	push di
+   351 000003A2 B800B8                  	mov ax, 0xb800
+   352 000003A5 8EC0                    	mov es, ax ; point es to video base
+   353 000003A7 31FF                    	xor di, di ; point di to top left column
+   354 000003A9 B82007                  	mov ax, 0x0720 ; space char in normal attribute
+   355 000003AC B9D007                  	mov cx, 2000 ; number of screen locations
+   356 000003AF FC                      	cld ; auto increment mode
+   357 000003B0 F3AB                    	rep stosw ; clear the whole screen
+   358 000003B2 5F                      	pop di 
+   359 000003B3 59                      	pop cx
+   360 000003B4 58                      	pop ax
+   361 000003B5 07                      	pop es
+   362 000003B6 C3                      ret 
+   363                                  border:
+   364 000003B7 50                      	push ax
+   365 000003B8 06                      	push es
+   366 000003B9 57                      	push di
+   367                                  	
+   368 000003BA B800B8                  	mov ax,0xb800
+   369 000003BD 8EC0                    	mov es,ax
+   370                                  	
+   371 000003BF B460                    	mov ah,0x60
+   372 000003C1 B020                    	mov al,0x20
+   373 000003C3 BFE201                  	mov di,482
+   374                                  	l1:
+   375 000003C6 268905                  		 mov word[es:di],ax
+   376 000003C9 83C702                  		 add di,2
+   377 000003CC 81FF7C02                		 cmp di,636
+   378 000003D0 75F4                    		 jne l1
+   379                                  	
+   380 000003D2 2E803E[B800]01          	cmp byte[cs:solid],1
+   381 000003D8 7504                    	jne nnp
+   382 000003DA B440                    		mov ah,0x40
+   383 000003DC EB02                    		jmp npp
+   384                                  	nnp:
+   385 000003DE B460                    		mov ah,0x60
+   386                                  	npp:
+   387 000003E0 BF620E                  		mov di,3682
+   388                                  		l2:
+   389 000003E3 268905                  			mov word[es:di],ax
+   390 000003E6 83C702                  			add di,2
+   391 000003E9 81FFFC0E                			cmp di,3836
+   392 000003ED 75F4                    			jne l2
+   393                                  	
+   394 000003EF B460                    	mov ah,0x60
+   395 000003F1 B020                    	mov al,0x20
+   396 000003F3 BFE201                  	mov di,482
+   397                                  	l3:
+   398 000003F6 268905                  		mov word[es:di],ax
+   399 000003F9 81C7A000                		add di,160
+   400 000003FD 81FF020F                		cmp di,3842
+   401 00000401 75F3                    		jne l3
+   402                                  		
+   403 00000403 BF7C02                  	mov di,636
+   404                                  	l4:
+   405 00000406 268905                  		mov word[es:di],ax
+   406 00000409 81C7A000                		add di,160
+   407 0000040D 81FF9C0F                		cmp di,3996
+   408 00000411 75F3                    		jne l4
+   409 00000413 5F                      	pop di
+   410 00000414 07                      	pop es
+   411 00000415 58                      	pop ax
+   412 00000416 C3                      ret
+   413                                  
+   414                                  brick_remove:
+   415 00000417 06                      	push es
+   416 00000418 50                      	push ax
+   417 00000419 52                      	push dx
+   418 0000041A 51                      	push cx
+   419 0000041B 56                      	push si
+   420 0000041C 53                      	push bx
+   421                                  	
+   422 0000041D B800B8                  	mov ax,0xb800
+   423 00000420 8EC0                    	mov es,ax
+   424                                  	
+   425 00000422 B91800                  	mov cx , 24
+   426 00000425 BE0000                  	mov si , 0
+   427                                  	
+   428 00000428 2E8B16[A700]            	mov dx , [cs:calculated_location]
+   429                                  	
+   430                                  check:
+   431 0000042D 2E8B84[4300]            	mov ax , word[cs:bricks_start_location + si]
+   432 00000432 2E8B9C[7300]            	mov bx , word[cs:bricks_end_location + si]
+   433 00000437 83C602                  	add si , 2
+   434                                  	
+   435 0000043A 39C2                    	cmp dx , ax
+   436 0000043C 7304                    	jae checknext
+   437 0000043E E2ED                    	loop check
+   438 00000440 EB3D                    	jmp end_ofFunc
+   439                                  
+   440                                  checknext:
+   441 00000442 39DA                    	cmp dx , bx
+   442 00000444 7604                    	jbe remove
+   443 00000446 E2E5                    	loop check
+   444 00000448 EB35                    	jmp end_ofFunc
+   445                                  
+   446                                  remove:	
+   447 0000044A 3D4E03                  	cmp ax,846
+   448 0000044D 7506                    	jne np
+   449 0000044F 2EC606[B800]01          		mov byte[cs:solid],1
+   450                                  	np:
+   451                                  	
+   452 00000455 83EE02                  	sub si , 2
+   453                                  	
+   454 00000458 2E8BBC[4300]            	mov di , word[cs:bricks_start_location + si]
+   455 0000045D B90600                  	mov cx , 6
+   456 00000460 B82007                  	mov ax , 0x0720
+   457 00000463 F3AB                    	rep stosw
+   458 00000465 E8E8FD                  	call sound
+   459 00000468 2E8306[A300]05          	add word[cs:score] , 5
+   460 0000046E 2EFF0E[A500]            	dec word[cs:total_bricks]
+   461 00000473 B8AE00                  	mov ax , 174
+   462 00000476 50                      	push ax
+   463 00000477 2EFF36[A300]            	push word[cs:score]
+   464 0000047C E83DFE                  	call printnum
+   465                                  	
+   466                                  	
+   467                                  end_ofFunc:
+   468 0000047F 5B                      	pop bx
+   469 00000480 5E                      	pop si
+   470 00000481 59                      	pop	cx
+   471 00000482 5A                      	pop dx
+   472 00000483 58                      	pop ax
+   473 00000484 07                      	pop es
+   474 00000485 C3                      ret
+   475                                  bricks:
+   476 00000486 06                      	push es
+   477 00000487 51                      	push cx
+   478 00000488 53                      	push bx
+   479 00000489 56                      	push si
+   480 0000048A 57                      	push di
+   481                                  	
+   482 0000048B B800B8                  	mov ax, 0xb800
+   483 0000048E 8EC0                    	mov es, ax 	; point es to video base
+   484 00000490 BF2A03                  	mov di,	810	; point di to top left column
+   485 00000493 BE0000                  	mov si , 0
+   486 00000496 BB0000                  	mov bx , 0
+   487                                  	
+   488 00000499 FC                      	cld
+   489                                  	
+   490                                  	brickline1:
+   491 0000049A 81FFA803                		cmp di , 936
+   492 0000049E 7716                    		ja brickline2
+   493 000004A0 B490                    			mov ah , 0x90
+   494 000004A2 B020                    			mov al , 0x20
+   495 000004A4 B90600                  			mov cx , 6
+   496 000004A7 F3AB                    			rep stosw
+   497 000004A9 B90300                  			mov cx , 3
+   498 000004AC B82007                  			mov ax, 0x0720 
+   499 000004AF F3AB                    			rep stosw
+   500 000004B1 83C602                  			add si , 2	
+   501 000004B4 EBE4                    			jmp brickline1
+   502                                  	
+   503                                  	brickline2:
+   504 000004B6 BF0A05                  		mov di , 1290
+   505                                  	brickline2_print:
+   506 000004B9 81FF8805                		cmp di, 1416
+   507 000004BD 7716                    		ja brickline3
+   508 000004BF B4E0                    			mov ah , 0xe0
+   509 000004C1 B020                    			mov al , 0x20
+   510 000004C3 B90600                  			mov cx , 6
+   511 000004C6 F3AB                    			rep stosw
+   512 000004C8 B90300                  			mov cx , 3
+   513 000004CB B82007                  			mov ax, 0x0720 
+   514 000004CE F3AB                    			rep stosw
+   515 000004D0 83C602                  			add si , 2	
+   516 000004D3 EBE4                    			jmp brickline2_print
+   517                                  	
+   518                                  	brickline3:
+   519 000004D5 BFEA06                  		mov di, 1770
+   520                                  	brickline2_print3:
+   521 000004D8 81FF6807                		cmp di, 1896
+   522 000004DC 7716                    		ja endn
+   523 000004DE B450                    			mov ah , 0x50
+   524 000004E0 B020                    			mov al , 0x20
+   525 000004E2 B90600                  			mov cx , 6
+   526 000004E5 F3AB                    			rep stosw
+   527 000004E7 B90300                  			mov cx , 3
+   528 000004EA B82007                  			mov ax, 0x0720 
+   529 000004ED F3AB                    			rep stosw
+   530 000004EF 83C602                  			add si , 2	
+   531 000004F2 EBE4                    			jmp brickline2_print3
+   532                                  	
+   533                                  	endn:
+   534 000004F4 BF4E03                  	mov di,846
+   535 000004F7 B90600                  	mov cx,6
+   536 000004FA B020                    	mov al,0x20
+   537 000004FC B440                    	mov ah,0x40
+   538 000004FE F3AB                    	rep stosw
+   539                                  	
+   540 00000500 5F                      	pop di
+   541 00000501 5E                      	pop si
+   542 00000502 5B                      	pop bx
+   543 00000503 59                      	pop cx
+   544 00000504 07                      	pop es
+   545 00000505 C3                      ret
+   546                                  
+   547                                  
+   548                                  
+   549                                  
+   550                                  clearStacker:
+   551 00000506 55                      	push bp
+   552 00000507 89E5                    	mov bp , sp
+   553 00000509 06                      	push es
+   554 0000050A 50                      	push ax
+   555 0000050B 57                      	push di
+   556 0000050C 51                      	push cx
+   557                                  	
+   558 0000050D B800B8                  	mov ax , 0xb800
+   559 00000510 8EC0                    	mov es , ax
+   560                                  	
+   561 00000512 B82007                  	mov ax , 0x0720
+   562 00000515 B90D00                  	mov cx , 13
+   563 00000518 8B7E04                  	mov di , [bp+4]
+   564                                  	
+   565 0000051B F3AB                    	rep stosw
+   566 0000051D 2E8B3E[B000]            	mov di,[cs:preBall]
+   567 00000522 268905                  	mov word[es:di],ax
+   568                                  	
+   569 00000525 59                      	pop cx
+   570 00000526 5F                      	pop di
+   571 00000527 58                      	pop ax
+   572 00000528 07                      	pop es
+   573 00000529 5D                      	pop bp
+   574 0000052A C20200                  ret	2
+   575                                  printStacker:
+   576 0000052D 55                      	push bp
+   577 0000052E 89E5                    	mov bp , sp
+   578 00000530 06                      	push es
+   579 00000531 50                      	push ax
+   580 00000532 57                      	push di
+   581 00000533 51                      	push cx
+   582                                  	
+   583 00000534 B800B8                  	mov ax , 0xb800
+   584 00000537 8EC0                    	mov es , ax
+   585                                  	
+   586 00000539 B020                    	mov al , 0x20
+   587 0000053B B4B0                    	mov ah , 0xb0
+   588 0000053D B90D00                  	mov cx , 13
+   589 00000540 8B7E04                  	mov di , [bp+4]
+   590                                  	
+   591 00000543 2E893E[A900]            	mov word[cs:left_limit] , di
+   592 00000548 F3AB                    	rep stosw
+   593 0000054A 83EF02                  	sub di , 2
+   594 0000054D 2E893E[AB00]            	mov word[cs:right_limit] , di
+   595                                  	
+   596 00000552 2EA1[AB00]              	mov ax , word[cs:right_limit]
+   597 00000556 83E80C                  	sub ax,12
+   598 00000559 2EA3[AD00]              	mov word[cs:mid] , ax
+   599                                  	
+   600 0000055D 2DA000                  	sub ax,160
+   601 00000560 89C7                    	mov di,ax
+   602 00000562 D1E8                    	shr ax,1
+   603 00000564 2D9006                  	sub ax,1680
+   604 00000567 89C1                    	mov cx,ax
+   605                                  	
+   606 00000569 2E803E[B500]01          	cmp byte[cs:StayOnStacker],1
+   607 0000056F 751D                    	jne endi
+   608 00000571 B04F                    		mov al,'O'
+   609 00000573 B407                    		mov ah,0x07
+   610 00000575 268905                  		mov word[es:di],ax
+   611 00000578 2E893E[B000]            		mov [cs:preBall],di
+   612 0000057D 2EC706[2C00]1500        		mov word[cs:row],21
+   613 00000584 2E890E[2A00]            		mov word[cs:colume],cx
+   614 00000589 2E893E[3000]            		mov word[cs:previous],di
+   615                                  		
+   616                                  	endi:
+   617 0000058E 59                      	pop cx
+   618 0000058F 5F                      	pop di
+   619 00000590 58                      	pop ax
+   620 00000591 07                      	pop es
+   621 00000592 5D                      	pop bp
+   622 00000593 C20200                  ret	2
+   623                                  stacker:
+   624 00000596 50                      	push ax
+   625 00000597 57                      	push di
+   626                                  	
+   627 00000598 2E833E[3700]01          	cmp word[cs:right_] , 1
+   628 0000059E 7408                    	je movRight
+   629 000005A0 2E833E[3900]01          	cmp word[cs:left_] , 1
+   630 000005A6 7421                    	je movLeft
+   631                                  	
+   632                                  	movRight:
+   633 000005A8 2EA1[3B00]              		mov ax, word[cs:pre_stack_pos]
+   634 000005AC 83C008                  		add ax , 8
+   635 000005AF 2E3B06[3500]            		cmp ax , word[cs:right_edge]
+   636 000005B4 7734                    		ja exit1
+   637 000005B6 2E8B3E[3B00]            			mov di, word[cs:pre_stack_pos]
+   638 000005BB 57                      			push di
+   639 000005BC E847FF                  			call clearStacker
+   640 000005BF 50                      			push ax
+   641 000005C0 E86AFF                  			call printStacker
+   642 000005C3 2EA3[3B00]              			mov word[cs:pre_stack_pos] , ax
+   643 000005C7 EB21                    			jmp exit1
+   644                                  	
+   645                                  	movLeft:
+   646 000005C9 2EA1[3B00]              		mov ax, word[cs:pre_stack_pos]
+   647 000005CD 83E808                  		sub ax , 8
+   648 000005D0 2E3B06[3300]            		cmp ax , word[cs:left_edge]
+   649 000005D5 7213                    		jb exit1
+   650 000005D7 2E8B3E[3B00]            			mov di, word[cs:pre_stack_pos]
+   651 000005DC 57                      			push di
+   652 000005DD E826FF                  			call clearStacker
+   653 000005E0 50                      			push ax
+   654 000005E1 E849FF                  			call printStacker
+   655 000005E4 2EA3[3B00]              			mov word[cs:pre_stack_pos] , ax
+   656 000005E8 EB00                    			jmp exit1
+   657                                  	
+   658                                  	exit1:
+   659 000005EA 5F                      		pop di
+   660 000005EB 58                      		pop ax
+   661 000005EC C3                      ret
+   662                                  calculate_position: ;;;;				first push x then push y
+   663 000005ED 55                      	push bp
+   664 000005EE 89E5                    	mov bp , sp
+   665 000005F0 50                      	push ax
+   666                                  	
+   667 000005F1 B050                    	mov al , 80
+   668 000005F3 F66604                  	mul byte[bp+4]
+   669 000005F6 034606                  	add ax , [bp+6]
+   670 000005F9 D1E0                    	shl ax ,1
+   671                                  	
+   672 000005FB 2EA3[A700]              	mov word[cs:calculated_location] , ax
+   673                                  	
+   674 000005FF 58                      	pop ax
+   675 00000600 5D                      	pop bp
+   676 00000601 C20400                  	ret 4
+   677                                  nextposition:
+   678 00000604 50                      	push ax
+   679 00000605 53                      	push bx
+   680 00000606 51                      	push cx
+   681                                  	
+   682 00000607 2EA0[2E00]              	mov al,[cs:incC]
+   683 0000060B 2E8A26[2F00]            	mov ah,[cs:incR]
+   684 00000610 2E8B1E[2A00]            	mov bx,[cs:colume]
+   685 00000615 2E8B0E[2C00]            	mov cx,[cs:row]
+   686                                  
+   687 0000061A 2E833E[2A00]03          	cmp word[cs:colume],3
+   688 00000620 7504                    	jne nextcond4
+   689 00000622 B001                    		mov al,1
+   690 00000624 EB0A                    		jmp rowCheck3
+   691                                  	nextcond4:
+   692 00000626 2E833E[2A00]4D          		cmp word[cs:colume],77
+   693 0000062C 7502                    		jne rowCheck3
+   694 0000062E B000                    			mov al,0
+   695                                  			
+   696                                  	rowCheck3:
+   697 00000630 2E833E[2C00]04          		cmp word[cs:row],4
+   698 00000636 7504                    		jne nextcond5
+   699 00000638 B401                    			mov ah,1
+   700 0000063A EB0A                    			jmp printingLocation1
+   701                                  		nextcond5:
+   702 0000063C 2E833E[2C00]16          			cmp word[cs:row],22
+   703 00000642 7502                    			jne printingLocation1
+   704 00000644 B400                    				mov ah,0
+   705                                  	
+   706                                  	printingLocation1:
+   707 00000646 3C01                    		cmp al,1
+   708 00000648 7505                    		jne nextcond6
+   709 0000064A 83C301                  			add bx,1
+   710 0000064D EB03                    			jmp rowCheck4
+   711                                  		nextcond6:
+   712 0000064F 83EB01                  			sub bx,1
+   713                                  			
+   714                                  		rowCheck4:
+   715 00000652 80FC01                  			cmp ah,1
+   716 00000655 7505                    			jne nextcond7
+   717 00000657 83C101                  				add cx,1
+   718 0000065A EB03                    				jmp calculatelocation1
+   719                                  			nextcond7:
+   720 0000065C 83E901                  				sub cx,1
+   721                                  	calculatelocation1:
+   722 0000065F 53                      		push bx ;colume
+   723 00000660 51                      		push cx ;row
+   724 00000661 E889FF                  		call calculate_position
+   725                                  		
+   726 00000664 59                      	pop cx
+   727 00000665 5B                      	pop bx
+   728 00000666 58                      	pop ax
+   729 00000667 C3                      ret
+   730                                  left_right:
+   731 00000668 50                      	push ax
+   732                                  	
+   733 00000669 2EA1[A700]              	mov ax , word[cs:calculated_location]
+   734 0000066D 2E3B06[AD00]            	cmp ax , [cs:mid]
+   735 00000672 770F                    	ja check_right
+   736                                  	
+   737 00000674 2E3B06[A900]            	cmp ax , [cs:left_limit]
+   738 00000679 7217                    	jb endit
+   739 0000067B 2EC606[AF00]00          	mov byte[cs:left_or_right] , 0
+   740 00000681 EB0F                    	jmp endit
+   741                                  	
+   742                                  	check_right:
+   743 00000683 2E3B06[AB00]            	cmp ax , [cs:right_limit]
+   744 00000688 7708                    	ja endit
+   745 0000068A 2EC606[AF00]01          	mov byte[cs:left_or_right] , 1
+   746 00000690 EB00                    	jmp endit
+   747                                  	
+   748                                  	endit:
+   749 00000692 58                      	pop ax
+   750 00000693 C3                      ret
+   751                                  
+   752                                  ball:
+   753 00000694 06                      	push es
+   754 00000695 50                      	push ax
+   755 00000696 53                      	push bx
+   756 00000697 51                      	push cx
+   757 00000698 57                      	push di
+   758                                  	
+   759 00000699 B800B8                  	mov ax,0xb800
+   760 0000069C 8EC0                    	mov es,ax
+   761                                  	
+   762 0000069E 2E8B3E[3000]            	mov di,[cs:previous]
+   763 000006A3 26C7052007              	mov word[es:di],0x0720
+   764 000006A8 E859FF                  	call nextposition
+   765 000006AB 2E8B3E[A700]            	mov di,[cs:calculated_location]
+   766 000006B0 268B05                  	mov ax,word[es:di]
+   767 000006B3 80FC07                  	cmp ah,0x07
+   768 000006B6 7441                    	je R
+   769 000006B8 80FCB0                  		cmp ah,0xb0
+   770 000006BB 7405                    		je n
+   771 000006BD E857FD                  		call brick_remove
+   772 000006C0 EB19                    		jmp n1
+   773                                  		n:
+   774 000006C2 E8A3FF                  			call left_right
+   775 000006C5 2E803E[AF00]01          			cmp byte[cs:left_or_right],1
+   776 000006CB 7508                    			jne n3
+   777 000006CD 2EC606[2E00]01          				mov byte[cs:incC],1
+   778 000006D3 EB06                    				jmp n1
+   779                                  			n3:
+   780 000006D5 2EC606[2E00]00          				mov byte[cs:incC],0
+   781                                  		n1:
+   782 000006DB 2E803E[2F00]01          		cmp byte[cs:incR],1
+   783 000006E1 7508                    		jne r1
+   784 000006E3 2EC606[2F00]00          			mov byte[cs:incR],0
+   785 000006E9 EB0E                    			jmp R
+   786                                  		r1:
+   787 000006EB 2E803E[2F00]00          			cmp byte[cs:incR],0
+   788 000006F1 7506                    			jne R
+   789 000006F3 2EC606[2F00]01          				mov byte[cs:incR],1
+   790                                  	R:
+   791 000006F9 2E833E[2A00]03          	cmp word[cs:colume],3
+   792 000006FF 7508                    	jne nextcond
+   793 00000701 2EC606[2E00]01          		mov byte[cs:incC],1
+   794 00000707 EB0E                    		jmp rowCheck
+   795                                  	nextcond:
+   796 00000709 2E833E[2A00]4D          		cmp word[cs:colume],77
+   797 0000070F 7506                    		jne rowCheck
+   798 00000711 2EC606[2E00]00          			mov byte[cs:incC],0
+   799                                  			
+   800                                  	rowCheck:
+   801 00000717 2E833E[2C00]04          		cmp word[cs:row],4
+   802 0000071D 7508                    		jne nextcond1
+   803 0000071F 2EC606[2F00]01          			mov byte[cs:incR],1
+   804 00000725 EB60                    			jmp printingLocation
+   805                                  		nextcond1:
+   806 00000727 2E803E[B800]00          			cmp byte[cs:solid],0
+   807 0000072D 754B                    			jne solid12
+   808 0000072F 2E833E[2C00]16          				cmp word[cs:row],22
+   809 00000735 7550                    				jne printingLocation
+   810 00000737 2EC606[B500]01          					mov byte[cs:StayOnStacker],1 
+   811 0000073D 2EA1[AD00]              					mov ax,word[cs:mid]
+   812                                  	
+   813 00000741 2DA000                  					sub ax,160
+   814 00000744 89C7                    					mov di,ax
+   815 00000746 D1E8                    					shr ax,1
+   816 00000748 2D9006                  					sub ax,1680
+   817 0000074B 89C1                    					mov cx,ax
+   818                                  
+   819 0000074D B04F                    					mov al,'O'
+   820 0000074F B407                    					mov ah,0x07
+   821 00000751 268905                  					mov word[es:di],ax
+   822 00000754 2E893E[B000]            					mov [cs:preBall],di
+   823 00000759 2EC706[2C00]1500        					mov word[cs:row],21
+   824 00000760 2E890E[2A00]            					mov word[cs:colume],cx
+   825 00000765 2E893E[3000]            					mov word[cs:previous],di
+   826 0000076A 2E802E[B200]01          					sub byte[cs:live],1
+   827 00000770 2E803E[B200]00          					cmp byte[cs:live],0
+   828                                  					;call print_lives
+   829 00000776 7558                    					jne endii
+   830                                  						;push cs
+   831                                  						;jmp far endgame;;;;;;;;;;;;;;;;;;;
+   832 00000778 EB56                    					jmp endii
+   833                                  			solid12:
+   834 0000077A 2E833E[2C00]17          				cmp word[cs:row],23
+   835 00000780 7505                    				jne printingLocation
+   836 00000782 C606[2F00]00            					mov byte[incR],0
+   837                                  	printingLocation:
+   838 00000787 2E803E[2E00]01          		cmp byte[cs:incC],1
+   839 0000078D 7508                    		jne nextcond2
+   840 0000078F 2E8306[2A00]01          			add word[cs:colume],1
+   841 00000795 EB06                    			jmp rowCheck1
+   842                                  		nextcond2:
+   843 00000797 2E832E[2A00]01          			sub word[cs:colume],1
+   844                                  			
+   845                                  		rowCheck1:
+   846 0000079D 2E803E[2F00]01          			cmp byte[cs:incR],1
+   847 000007A3 7508                    			jne nextcond3
+   848 000007A5 2E8306[2C00]01          				add word[cs:row],1
+   849 000007AB EB06                    				jmp calculatelocation
+   850                                  			nextcond3:
+   851 000007AD 2E832E[2C00]01          				sub word[cs:row],1
+   852                                  		calculatelocation:
+   853 000007B3 2EA1[2C00]              		mov ax,word[cs:row]
+   854 000007B7 BB5000                  		mov bx,80
+   855 000007BA F7E3                    		mul bx
+   856 000007BC 2E0306[2A00]            		add ax,word[cs:colume]
+   857 000007C1 D1E0                    		shl ax,1
+   858 000007C3 89C7                    		mov di,ax
+   859 000007C5 2EA3[3000]              		mov word[cs:previous],ax
+   860                                  		
+   861 000007C9 B407                    	mov ah,0x07
+   862 000007CB B04F                    	mov al,'O'
+   863 000007CD 268905                  	mov word[es:di],ax
+   864                                  	
+   865                                  	endii:
+   866 000007D0 5F                      	pop di
+   867 000007D1 59                      	pop cx
+   868 000007D2 5B                      	pop bx
+   869 000007D3 58                      	pop ax
+   870 000007D4 07                      	pop es
+   871 000007D5 C3                      ret 
+   872 000007D6 00                      call_instruction_menu: db 0
+   873                                  instruction_menu:
+   874 000007D7 50                      	push ax
+   875 000007D8 E8C3FB                  	call clrscr
+   876                                  	
+   877                                  	
+   878 000007DB B87201                  	mov ax , 370 ; row 6 col 25
+   879 000007DE 50                      	push ax
+   880 000007DF B8[F700]                	mov ax ,instructions_str
+   881 000007E2 50                      	push ax
+   882 000007E3 B80B00                  	mov ax , 11
+   883 000007E6 50                      	push ax
+   884 000007E7 E851FB                  	call printstr_B
+   885                                  	
+   886 000007EA B8B202                  	mov ax , 690  ; row 6 col 25
+   887 000007ED 50                      	push ax
+   888 000007EE B8[3801]                	mov ax , ttl_live_str
+   889 000007F1 50                      	push ax
+   890 000007F2 B81600                  	mov ax , 22
+   891 000007F5 50                      	push ax
+   892                                  	
+   893 000007F6 E814FB                  	call printstr
+   894                                  	
+   895 000007F9 B8F203                  	mov ax , 1010
+   896 000007FC 50                      	push ax
+   897 000007FD B8[2001]                	mov ax , play_str
+   898 00000800 50                      	push ax
+   899 00000801 B81800                  	mov ax , 24
+   900 00000804 50                      	push ax
+   901 00000805 E805FB                  	call printstr
+   902                                  	
+   903                                  	
+   904                                  	
+   905 00000808 B83205                  	mov ax , 1330
+   906 0000080B 50                      	push ax
+   907 0000080C B8[7901]                	mov ax , solid_base_str
+   908 0000080F 50                      	push ax
+   909 00000810 B82900                  	mov ax , 41
+   910 00000813 50                      	push ax
+   911 00000814 E8F6FA                  	call printstr
+   912                                  	
+   913                                  	
+   914 00000817 B87206                  	mov ax , 1650
+   915 0000081A 50                      	push ax
+   916 0000081B B8[4E01]                	mov ax , bonus_note_str
+   917 0000081E 50                      	push ax
+   918 0000081F B82B00                  	mov ax , 43
+   919 00000822 50                      	push ax
+   920 00000823 E8E7FA                  	call printstr
+   921                                  	
+   922                                  		
+   923 00000826 B8B207                  	mov ax , 1970
+   924 00000829 50                      	push ax
+   925 0000082A B8[A201]                	mov ax , space_bar
+   926 0000082D 50                      	push ax
+   927 0000082E B81F00                  	mov ax , 31
+   928 00000831 50                      	push ax
+   929 00000832 E8D8FA                  	call printstr
+   930                                  	
+   931                                  	
+   932 00000835 B8F208                  	mov ax , 2290
+   933 00000838 50                      	push ax
+   934 00000839 B8[2E02]                	mov ax , left_arrow
+   935 0000083C 50                      	push ax
+   936 0000083D B82200                  	mov ax , 34
+   937 00000840 50                      	push ax
+   938 00000841 E8C9FA                  	call printstr
+   939                                  	
+   940 00000844 B8320A                  	mov ax , 2610
+   941 00000847 50                      	push ax
+   942 00000848 B8[E301]                	mov ax , exit_str
+   943 0000084B 50                      	push ax
+   944 0000084C B80F00                  	mov ax , 15
+   945 0000084F 50                      	push ax
+   946 00000850 E8BAFA                  	call printstr
+   947                                  	
+   948 00000853 58                      	pop ax
+   949 00000854 C3                      	ret
+   950                                  	
+   951                                  kbisr: 
+   952 00000855 50                      	push ax
+   953 00000856 06                      	push es
+   954                                  	
+   955 00000857 2EC706[3700]0000        	mov word[cs:right_] , 0
+   956 0000085E 2EC706[3900]0000        	mov word[cs:left_] , 0
+   957 00000865 B800B8                  	mov ax, 0xb800
+   958 00000868 8EC0                    	mov es, ax 
+   959                                  	
+   960 0000086A E460                    	in al, 0x60 ; read a char from keyboard port
+   961                                  	
+   962 0000086C 803E[0300]00            	cmp byte[start_game] , 0
+   963 00000871 751B                    	jne main_game
+   964                                  	
+   965 00000873 3C1C                    	cmp al , 0x1c
+   966 00000875 7507                    	jne cmp_instruction
+   967 00000877 C606[0300]01            	mov byte[start_game] , 1
+   968 0000087C EB79                    	jmp exit
+   969                                  	
+   970                                  cmp_instruction:
+   971 0000087E 3C17                    	cmp al , 0x17
+   972 00000880 7575                    	jne exit
+   973 00000882 C606[D607]01            	mov byte[call_instruction_menu] , 1
+   974                                  	
+   975 00000887 803E[0300]01            	cmp byte[start_game] , 1
+   976 0000088C 7569                    	jne exit
+   977                                  main_game:
+   978 0000088E 3C4B                    	cmp al, 0x4b ; left arrow
+   979 00000890 750C                    	jne nextcmp ; no, try next comparison
+   980 00000892 2EC706[3900]0100        		mov word[cs:left_] , 1
+   981 00000899 E8FAFC                  		call stacker ; 
+   982 0000089C EB59                    		jmp exit ; leave interrupt routine
+   983                                  	nextcmp: 
+   984 0000089E 3C4D                    		cmp al, 0x4d ; right arrow
+   985 000008A0 750C                    		jne nextcmp2  ; no, leave interrupt routine
+   986 000008A2 2EC706[3700]0100        			mov word[cs:right_] , 1
+   987 000008A9 E8EAFC                  			call stacker
+   988 000008AC EB49                    			jmp exit
+   989                                  	nextcmp2: 
+   990 000008AE 3CAD                    		cmp al, 0xad ; has the A key released
+   991 000008B0 7502                    		jne nextcmp3 ; no, try next comparison
+   992                                  		;leave interrupt routine
+   993 000008B2 EB43                    		jmp exit
+   994                                  	nextcmp3: 
+   995 000008B4 3CAB                    		cmp al, 0xab ; has the D key released
+   996 000008B6 7502                    		jne nextcmp4 ; no, chain to old ISR
+   997 000008B8 EB3D                    		jmp exit 
+   998                                  	nextcmp4:
+   999 000008BA 3C39                    		cmp al,0x39 ; space bar
+  1000 000008BC 7508                    		jne nextcmp5
+  1001 000008BE 2EC606[B500]00          			mov byte[cs:StayOnStacker],0
+  1002 000008C4 EB31                    		jmp exit
+  1003                                  	nextcmp5:
+  1004 000008C6 3CB9                    		cmp al,0xb9 ; has the space bar released
+  1005 000008C8 7502                    		jne exitcmp
+  1006 000008CA EB2B                    		jmp exit
+  1007                                  		
+  1008                                  	exitcmp: 
+  1009 000008CC 3C12                    		cmp al,0x12 ; has the E key released
+  1010 000008CE 7508                    		jne quitcmp
+  1011 000008D0 2EC606[BB09]01          		mov byte[cs:end_game] , 1
+  1012 000008D6 EB1F                    		jmp exit
+  1013                                  	quitcmp:
+  1014 000008D8 3C10                    		cmp al , 0x10 ; has the Q key released
+  1015 000008DA 7508                    		jne restartcmp
+  1016 000008DC 2EC606[990A]01          		mov byte[cs:quit] , 1
+  1017 000008E2 EB13                    		jmp exit
+  1018                                  	restartcmp:
+  1019 000008E4 3C13                    		cmp al , 0x13 ; has the R key released
+  1020 000008E6 7508                    		jne nomatch
+  1021 000008E8 2EC606[980A]01          		mov byte[cs:restart] , 1
+  1022 000008EE EB07                    		jmp exit
+  1023                                  	nomatch: 
+  1024 000008F0 07                      		pop es
+  1025 000008F1 58                      		pop ax
+  1026 000008F2 2EFF2E[2600]            		jmp far [cs:oldisr] 
+  1027                                  	exit:
+  1028 000008F7 B020                    		mov al, 0x20
+  1029 000008F9 E620                    		out 0x20, al 
+  1030 000008FB 07                      	pop es
+  1031 000008FC 58                      	pop ax 
+  1032 000008FD CF                      iret 
+  1033                                  
+  1034                                  timer: 
+  1035 000008FE 2E803E[0300]01          	cmp byte[cs:start_game],1
+  1036 00000904 755E                    	jne pp
+  1037 00000906 2EFE06[4000]            		inc byte[cs:clock]
+  1038 0000090B 2E803E[4000]12          		cmp byte[cs:clock],18
+  1039 00000911 750C                    		jne ppp
+  1040 00000913 2E8306[3D00]01          			add word[cs:second],1
+  1041 00000919 2EC606[4000]00          			mov byte[cs:clock],0
+  1042                                  		ppp:
+  1043 0000091F 2E803E[B800]01          		cmp byte[cs:solid],1
+  1044 00000925 7513                    		jne po
+  1045 00000927 2EFE06[B900]            			inc byte[cs:solid1]
+  1046 0000092C 2E803E[B900]B4          			cmp byte[cs:solid1],180
+  1047 00000932 7506                    			jne po
+  1048 00000934 2EC606[B800]00          				mov byte[cs:solid],0
+  1049                                  		po:
+  1050 0000093A 2EFF06[4100]            		inc word[cs:bonus]
+  1051 0000093F 2E813E[4100]7008        		cmp word[cs:bonus],2160
+  1052 00000946 770E                    		jnbe pk
+  1053 00000948 2E833E[A500]00          			cmp word[cs:total_bricks],0
+  1054 0000094E 7506                    			jne pk
+  1055 00000950 2E8306[A300]32          				add word[cs:score],50
+  1056                                  		pk:
+  1057 00000956 50                      		push ax
+  1058 00000957 B8F200                  		mov ax , 242
+  1059 0000095A 50                      		push ax
+  1060 0000095B 2EA1[3D00]              		mov ax , word[cs:second]
+  1061 0000095F 50                      		push ax
+  1062 00000960 E859F9                  		call printnum
+  1063 00000963 58                      		pop ax
+  1064                                  	pp:
+  1065 00000964 2E803E[B500]00          	cmp byte[cs:StayOnStacker],0
+  1066 0000096A 7521                    	jne endof
+  1067 0000096C 2E803E[0300]01          	cmp byte[cs:start_game] , 1
+  1068 00000972 7519                    	jne endof
+  1069 00000974 2EFE06[3200]            		inc byte[cs:tickcount]
+  1070 00000979 2E803E[3200]02          		cmp byte[cs:tickcount], 2
+  1071 0000097F 750C                    		jne endof
+  1072 00000981 E810FD                  			call ball
+  1073 00000984 E830FA                  			call border
+  1074 00000987 2EC606[3200]00          			mov byte[cs:tickcount],0
+  1075                                  			;jmp endiii
+  1076                                  		endof:
+  1077                                  		;cmp byte[cs:live],0
+  1078                                  		;jne endiii
+  1079                                  			;call youLose
+  1080                                  		;endiii:
+  1081 0000098D B020                    		mov al, 0x20
+  1082 0000098F E620                    		out 0x20, al ; end of interrupt
+  1083 00000991 CF                      iret ; return from interrupt 
+  1084                                  
+  1085                                  print_lives:
+  1086 00000992 50                      	push ax
+  1087 00000993 06                      	push es
+  1088                                  	
+  1089 00000994 B800B8                  	mov ax , 0xb800
+  1090 00000997 8EC0                    	mov es , ax
+  1091 00000999 B90300                  	mov cx , 3
+  1092 0000099C B82007                  	mov ax , 0x0720
+  1093 0000099F BF2401                  	mov di , 292
+  1094 000009A2 F3AB                    	rep stosw
+  1095                                  	
+  1096 000009A4 2E8A0E[B200]            	mov cl , byte[cs:live]
+  1097 000009A9 B500                    	mov ch , 0
+  1098 000009AB B407                    	mov ah , 0x07
+  1099 000009AD B02A                    	mov al , '*'
+  1100 000009AF BF2401                  	mov di , 292
+  1101 000009B2 F3AB                    	rep stosw
+  1102                                  	
+  1103 000009B4 07                      	pop es
+  1104 000009B5 58                      	pop ax
+  1105 000009B6 C3                      ret
+  1106                                  
+  1107 000009B7 00000000                oldtmr: dd 0
+  1108 000009BB 00                      end_game: db 0
+  1109                                  start:
+  1110                                  	
+  1111 000009BC 31C0                    	xor ax, ax
+  1112 000009BE 8EC0                    	mov es, ax ; point es to IVT base
+  1113                                  	
+  1114 000009C0 26A12400                	mov ax, [es:9*4]
+  1115 000009C4 A3[2600]                	mov [oldisr], ax ; save offset of old routine
+  1116 000009C7 26A12600                	mov ax, [es:9*4+2]
+  1117 000009CB A3[2800]                	mov [oldisr+2], ax ; save segment of old routine
+  1118                                  	
+  1119 000009CE 26A12000                	mov ax, [es:8*4]
+  1120 000009D2 A3[B709]                	mov [oldtmr], ax ; save offset of old routine
+  1121 000009D5 26A12200                	mov ax, [es:8*4+2]
+  1122 000009D9 A3[B909]                	mov [oldtmr+2], ax ; save segment of old routine
+  1123                                  	
+  1124 000009DC FA                      	cli ; disable interrupts
+  1125 000009DD 26C7062400[5508]        		mov word [es:9*4], kbisr 
+  1126 000009E4 268C0E2600              		mov [es:9*4+2], cs 
+  1127 000009E9 26C7062000[FE08]        		mov word [es:8*4],timer
+  1128 000009F0 268C0E2200              		mov [es:8*4+2],cs
+  1129 000009F5 FB                      	sti ; enable interrupts
+  1130                                  	
+  1131 000009F6 E881F8                  	call start_menu
+  1132                                  menu_loop:
+  1133 000009F9 803E[D607]01            	cmp byte[call_instruction_menu] , 1
+  1134 000009FE 7451                    	je instruction
+  1135 00000A00 803E[0300]00            	cmp byte[start_game] , 0
+  1136 00000A05 74F2                    	je menu_loop
+  1137 00000A07 803E[BB09]01            	cmp byte[end_game] , 1
+  1138 00000A0C 744F                    	je endgame
+  1139                                  start_game_here:
+  1140 00000A0E C606[980A]00            	mov byte[restart] , 0
+  1141 00000A13 C606[990A]00            	mov byte[quit] , 0
+  1142 00000A18 E883F9                  	call clrscr
+  1143 00000A1B E850F9                  	call printStrings
+  1144 00000A1E E871FF                  	call print_lives
+  1145 00000A21 B8AE00                  	mov ax , 174
+  1146 00000A24 50                      	push ax
+  1147 00000A25 FF36[A300]              	push word[score]
+  1148 00000A29 E890F8                  	call printnum
+  1149 00000A2C E888F9                  	call border
+  1150 00000A2F E854FA                  	call bricks
+  1151 00000A32 C606[B500]01            	mov byte[StayOnStacker],1
+  1152 00000A37 E85CFB                  	call stacker 
+  1153                                  game_inner_loop:
+  1154                                  		; mov ax , 402
+  1155                                  		; push ax
+  1156                                  		; mov ax , [second]
+  1157                                  		; push ax
+  1158                                  		; call printnum
+  1159                                  	
+  1160 00000A3A 833E[A500]00            	cmp word[total_bricks] , 0
+  1161 00000A3F 741C                    	je endgame ;;;;abhi impliment karna
+  1162 00000A41 803E[BB09]01            	cmp byte[end_game] , 1
+  1163 00000A46 7415                    	je endgame
+  1164 00000A48 803E[B200]00            	cmp byte[live] , 0
+  1165 00000A4D 740E                    	je endgame
+  1166 00000A4F EBE9                    	jmp game_inner_loop
+  1167                                  instruction:
+  1168 00000A51 E883FD                  	call instruction_menu
+  1169                                  again_ins:
+  1170 00000A54 803E[0300]01            	cmp byte[start_game] , 1
+  1171 00000A59 74B3                    	je start_game_here
+  1172 00000A5B 75F7                    	jne again_ins
+  1173                                  	
+  1174                                  endgame:
+  1175 00000A5D C606[0300]00            mov byte[start_game] , 0
+  1176 00000A62 E83700                  call last_menu
+  1177 00000A65 E836F9                  call clrscr
+  1178 00000A68 803E[980A]01            cmp byte[restart] , 1
+  1179 00000A6D 749F                    je start_game_here
+  1180 00000A6F A1[2600]                mov ax , [oldisr]
+  1181 00000A72 8B1E[2800]              mov bx , [oldisr+2]
+  1182 00000A76 8B0E[B709]              mov cx , [oldtmr]
+  1183 00000A7A 8B16[B909]              mov dx , [oldtmr+2]
+  1184 00000A7E FA                      cli 
+  1185 00000A7F 26A32400                mov [es:9*4] , ax
+  1186 00000A83 26891E2600              mov [es:9*4+2], bx
+  1187 00000A88 26890E2000              mov [es:8*4] , cx
+  1188 00000A8D 2689162200              mov [es:8*4+2], dx
+  1189 00000A92 FB                      sti
+  1190                                  
+  1191 00000A93 B8004C                  mov ax , 0x4c00
+  1192 00000A96 CD21                    int 0x21
+  1193                                  
+  1194                                  
+  1195 00000A98 00                      restart: db 0
+  1196 00000A99 00                      quit: db 0
+  1197 00000A9A 0000                    variable: dw 0
+  1198                                  
+  1199                                  
+  1200                                  
+  1201                                  last_menu:
+  1202                                  ;mov byte[start_game] , 1
+  1203 00000A9C 50                      	push ax
+  1204 00000A9D E8FEF8                  		call clrscr
+  1205                                  		
+  1206 00000AA0 803E[B200]01            	cmp byte[live] , 1
+  1207 00000AA5 750F                    	jne check_win
+  1208 00000AA7 B8C607                  	mov ax , 1990
+  1209 00000AAA 50                      	push ax
+  1210 00000AAB B8[BA00]                	mov ax , Lose_str
+  1211 00000AAE 50                      	push ax
+  1212 00000AAF B80800                  	mov ax , 8
+  1213 00000AB2 50                      	push ax
+  1214 00000AB3 E885F8                  	call printstr_B
+  1215                                  check_win:
+  1216 00000AB6 833E[A500]00            	cmp word[total_bricks] , 0
+  1217 00000ABB 750F                    	jne no_results
+  1218 00000ABD B8C607                  	mov ax , 1990
+  1219 00000AC0 50                      	push ax
+  1220 00000AC1 B8[BA00]                	mov ax , Lose_str
+  1221 00000AC4 50                      	push ax
+  1222 00000AC5 B80800                  	mov ax , 8
+  1223 00000AC8 50                      	push ax
+  1224 00000AC9 E86FF8                  	call printstr_B
+  1225                                  	
+  1226                                  no_results:
+  1227                                  	
+  1228                                  			
+  1229 00000ACC E84200                  		call last_menu_display
+  1230                                  	
+  1231                                  	
+  1232                                  what_nxt:
+  1233 00000ACF 2E803E[980A]01          		cmp byte[cs:restart] , 1
+  1234 00000AD5 740C                    		je do_restart
+  1235 00000AD7 2E803E[990A]01          		cmp byte[cs:quit] , 1
+  1236 00000ADD 7402                    		je go_quit
+  1237 00000ADF EBEE                    		jmp what_nxt
+  1238                                  
+  1239                                  go_quit:
+  1240 00000AE1 58                      		pop ax
+  1241 00000AE2 C3                      		ret
+  1242                                  		
+  1243                                  do_restart:
+  1244 00000AE3 58                      		pop ax
+  1245 00000AE4 C706[3D00]0000          		mov word[second] , 0
+  1246 00000AEA C606[4000]00            		mov byte[clock] , 0
+  1247 00000AEF C606[0300]01            		mov byte[start_game] , 1
+  1248 00000AF4 C706[A500]1800          		mov word[total_bricks] , 24
+  1249 00000AFA C606[B200]03            		mov byte[live] , 3
+  1250 00000AFF C706[A300]0000          		mov word[score] , 0
+  1251 00000B05 C606[BB09]00            		mov byte[end_game] , 0
+  1252 00000B0A C706[4100]0000          		mov word[bonus] , 0
+  1253 00000B10 C3                      		ret
+  1254                                  		
+  1255                                  last_menu_display:
+  1256 00000B11 50                      	push ax
+  1257                                  	
+  1258 00000B12 B8B202                  	mov ax , 690  ; row 6 col 25
+  1259 00000B15 50                      	push ax
+  1260 00000B16 B8[C101]                	mov ax ,total_score_str
+  1261 00000B19 50                      	push ax
+  1262 00000B1A B81100                  	mov ax , 17
+  1263 00000B1D 50                      	push ax
+  1264 00000B1E E8ECF7                  	call printstr
+  1265                                  	
+  1266                                  	
+  1267 00000B21 B8D802                  	mov ax , 728 ; row 6 col 25
+  1268 00000B24 50                      	push ax
+  1269 00000B25 FF36[A300]              	push word[score]
+  1270 00000B29 E890F7                  	call printnum
+  1271                                  	
+  1272                                  	
+  1273 00000B2C B83205                  	mov ax , 1330  ; row 6 col 25
+  1274 00000B2F 50                      	push ax
+  1275 00000B30 B8[D401]                	mov ax ,lives_remain_str
+  1276 00000B33 50                      	push ax
+  1277 00000B34 B80F00                  	mov ax , 15
+  1278 00000B37 50                      	push ax
+  1279 00000B38 E8D2F7                  	call printstr
+  1280                                  	
+  1281 00000B3B B87005                  	mov ax , 1392 ; row 6 col 25
+  1282 00000B3E 50                      	push ax
+  1283 00000B3F FF36[B200]              	push word[live]
+  1284 00000B43 E876F7                  	call printnum
+  1285                                  	
+  1286                                  	
+  1287 00000B46 B87206                  	mov ax , 1650  ; row 6 col 25
+  1288 00000B49 50                      	push ax
+  1289 00000B4A B8[0C02]                	mov ax ,restart_str
+  1290 00000B4D 50                      	push ax
+  1291 00000B4E B82200                  	mov ax , 34
+  1292 00000B51 50                      	push ax
+  1293 00000B52 E8B8F7                  	call printstr
+  1294                                  	
+  1295                                  	
+  1296 00000B55 B8B207                  	mov ax , 1970  ; row 6 col 25
+  1297 00000B58 50                      	push ax
+  1298 00000B59 B8[F201]                	mov ax , quit_str
+  1299 00000B5C 50                      	push ax
+  1300 00000B5D B81A00                  	mov ax , 26
+  1301 00000B60 50                      	push ax
+  1302 00000B61 E8A9F7                  	call printstr
+  1303                                  	
+  1304 00000B64 58                      	pop ax
+  1305 00000B65 C3                      	ret

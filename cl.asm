@@ -1091,16 +1091,16 @@ kbisr:
 	mov ax, 0xb800
 	mov es, ax 
 	
-	in al, 0x60 ; read a char from keyboard port
+	in al, 0x60
 	
 	cmp byte[start_game] , 0
 	jne main_game
 
-	cmp al, 0x01    ; ESC key
+	cmp al, 0x01
 	jne check_enter
 		call clrscr
 	    mov ax, 0x4c00
-	    int 0x21        ; Exit program
+	    int 0x21
 
 	check_enter:
 	cmp al , 0x1c   ; Enter key
@@ -1116,7 +1116,7 @@ cmp_instruction:
 	cmp byte[start_game] , 1
 	jne exit
 main_game:
-	cmp al, 0x4b ; left arrow
+	cmp al, 0x4b
 	jne nextcmp ; no, try next comparison
 		mov word[cs:left_] , 1
 		call stacker ; 

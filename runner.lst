@@ -1135,16 +1135,16 @@
   1091 00000AB6 B800B8                  	mov ax, 0xb800
   1092 00000AB9 8EC0                    	mov es, ax 
   1093                                  	
-  1094 00000ABB E460                    	in al, 0x60 ; read a char from keyboard port
+  1094 00000ABB E460                    	in al, 0x60
   1095                                  	
   1096 00000ABD 803E[0300]00            	cmp byte[start_game] , 0
   1097 00000AC2 7527                    	jne main_game
   1098                                  
-  1099 00000AC4 3C01                    	cmp al, 0x01    ; ESC key
+  1099 00000AC4 3C01                    	cmp al, 0x01
   1100 00000AC6 7508                    	jne check_enter
   1101 00000AC8 E83FFA                  		call clrscr
   1102 00000ACB B8004C                  	    mov ax, 0x4c00
-  1103 00000ACE CD21                    	    int 0x21        ; Exit program
+  1103 00000ACE CD21                    	    int 0x21
   1104                                  
   1105                                  	check_enter:
   1106 00000AD0 3C1C                    	cmp al , 0x1c   ; Enter key
@@ -1160,7 +1160,7 @@
   1116 00000AE4 803E[0300]01            	cmp byte[start_game] , 1
   1117 00000AE9 7569                    	jne exit
   1118                                  main_game:
-  1119 00000AEB 3C4B                    	cmp al, 0x4b ; left arrow
+  1119 00000AEB 3C4B                    	cmp al, 0x4b
   1120 00000AED 750C                    	jne nextcmp ; no, try next comparison
   1121 00000AEF 2EC706[1800]0100        		mov word[cs:left_] , 1
   1122 00000AF6 E831FC                  		call stacker ; 
@@ -1394,7 +1394,7 @@
   1350 00000D0C 803E[9100]00            	cmp byte[live], 0
   1351 00000D11 7514                    	jne check_win
   1352                                  		; Player lost - play sad sound
-  1353 00000D13 E84EF6                  		call sound_game_lost
+  1353 00000D13 E8E1F5                  		call sound_game_won
   1354 00000D16 B8C607                  		mov ax, 1990
   1355 00000D19 50                      		push ax
   1356 00000D1A B8[4102]                		mov ax, Lose_str

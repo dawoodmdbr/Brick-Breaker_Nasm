@@ -45,7 +45,7 @@ solid: db 0
 solid1: db 0
 
 welcome_str: db "WELCOME TO BRICK BREAKER"
-group_str: db '24F-3053 | 24F-3053'
+group_str: db '24F-3053 | 24F-3119'
 instructions_str: db "USE ARROW KEYS TO MOVE AND SPACE TO START"
 play_str: db "PRESS ENTER TO PLAY GAME"
 score_rule_str: db 'EACH BRICK = 5 POINTS'
@@ -60,11 +60,23 @@ exit_str: db 'PRESS E TO EXIT'
 quit_str: db 'PRESS ENTER+Q TO QUIT GAME'
 restart_str: db 'PRESS ENTER+R TO RESTART YOUR GAME'
 left_arrow: db 'USE RIGHT & LEFT ARROW TO MOVE BAR'
-Lose_str: db 'YOU_LOSE'
-Win_str: db 'YOU_WIN!'
 Score_str: db 'SCORE'
 Lives_str: db 'LIVES'
 time_str: db 'TIME '
+bonus_msg_str: db 'BONUS AWARDED: +50 POINTS!'
+time_taken_str: db 'TIME TAKEN :'
+seconds_str: db 'seconds'
+
+Lose_str: db 'GET REKT NOOB GG'
+skill_issue_str: db 'MAJOR SKILL ISSUE'
+Win_str: db 'W GAMER MOMENT GG!'
+clutch_str: db 'INSANE CLUTCH +50 BONUS LETS GO!'
+final_score_str: db 'FINAL SCORE: '
+hp_left_str: db 'HP LEFT: '
+speedrun_str: db 'TIME: '
+secs_str: db 'sec'
+run_back_str: db 'R TO RUN IT BACK BRO'
+rage_quit_str: db 'ESC TO RAGE QUIT'
 
 sound:
 	push ax
@@ -346,7 +358,7 @@ start_menu:
 	push ax
 	mov ax, esc_exit_str
 	push ax
-	mov ax, 18
+	mov ax, 17
 	push ax
 	call printstr
 	pop ax
@@ -1142,29 +1154,39 @@ main_game:
 			mov byte[cs:StayOnStacker],0
 		jmp exit
 	nextcmp5:
-		cmp al,0xb9 ; has the space bar released
-		jne exitcmp
-		jmp exit
-		
-	exitcmp: 
-		cmp al,0x12 ; has the E key released
-		jne quitcmp
-		mov byte[cs:end_game] , 1
-		jmp exit
-	quitcmp:
-		cmp al , 0x10 ; has the Q key released
-		jne restartcmp
-		mov byte[cs:quit] , 1
-		jmp exit
-	restartcmp:
-		cmp al , 0x13 ; has the R key released
-		jne nomatch
-		mov byte[cs:restart] , 1
-		jmp exit
+	    cmp al, 0xb9        ; space bar released
+	    jne check_e_key
+	    jmp exit
+
+	check_e_key:
+	    cmp al, 0x12        ; E key pressed (not released)
+	    jne check_q_key
+	    cmp byte[cs:start_game], 1
+	    jne exit
+	    mov byte[cs:end_game], 1
+	    jmp exit
+
+	check_q_key:
+	    cmp al, 0x10        ; Q key pressed
+	    jne check_r_key
+	    cmp byte[cs:end_game], 1  ; Only allow quit on end screen
+	    jne exit
+	    mov byte[cs:quit], 1
+	    jmp exit
+
+	check_r_key:
+	    cmp al, 0x13        ; R key pressed
+	    jne nomatch
+	    cmp byte[cs:end_game], 1  ; Only allow restart on end screen
+	    jne exit
+	    mov byte[cs:restart], 1
+	    jmp exit
+
 	nomatch: 
-		pop es
-		pop ax
-		jmp far [cs:oldisr] 
+	    pop es
+	    pop ax
+	    jmp far [cs:oldisr]
+
 	exit:
 		mov al, 0x20
 		out 0x20, al 
@@ -1302,7 +1324,7 @@ game_inner_loop:
 		; call printnum
 	
 	cmp word[total_bricks] , 0
-	je endgame ;;;;abhi impliment karna
+	je endgame
 	cmp byte[end_game] , 1
 	je endgame
 	cmp byte[live] , 0
@@ -1341,60 +1363,172 @@ quit: db 0
 variable: dw 0
 
 
-
 last_menu:
-	push ax
-	call clrscr
-	
-	cmp byte[live], 0
-	jne check_win
-		call sound_game_lost
-		mov ax, 1990
-		push ax
-		mov ax, Lose_str
-		push ax
-		mov ax, 8
-		push ax
-		call printstr_B
-		jmp no_results
-		
+    push ax
+    call clrscr
+    
+    ; Check if player lost (lives = 0)
+    cmp byte[live], 0
+    jne check_win
+        call sound_game_lost
+        
+        ; Display loss messages
+        ; Row 8, Col 32: (8*160) + (32*2) = 1280 + 64 = 1022
+        mov ax, 1022              
+        push ax
+        mov ax, Lose_str
+        push ax
+        mov ax, 16
+        push ax
+        call printstr
+        
+        ; Row 10, Col 31: (10*160) + (31*2) = 1600 + 62 = 1342
+        mov ax, 1342              
+        push ax
+        mov ax, skill_issue_str
+        push ax
+        mov ax, 17
+        push ax
+        call printstr
+        
+        jmp display_stats
+        
 check_win:
-	cmp word[total_bricks], 0
-	jne no_results
-		call sound_game_won
-		mov ax, 1990
-		push ax
-		mov ax, Win_str
-		push ax
-		mov ax, 8
-		push ax
-		call printstr_B
-	
-no_results:
-	call last_menu_display
-	
-what_nxt:
-	cmp byte[cs:restart], 1
-	je do_restart
-	cmp byte[cs:quit], 1
-	je go_quit
-	jmp what_nxt
+    cmp word[total_bricks], 0
+    jne display_stats
+        call sound_game_won
+        
+        ; Display win messages
+        ; Row 8, Col 31: (8*160) + (31*2) = 1280 + 62 = 1022
+        mov ax, 1022              
+        push ax
+        mov ax, Win_str
+        push ax
+        mov ax, 18
+        push ax
+        call printstr
+        
+        ; Display bonus message if applicable
+        cmp word[bonus], 2160
+        ja display_stats
+            ; Row 10, Col 24: (10*160) + (24*2) = 1600 + 48 = 1328
+            mov ax, 1328
+            push ax
+            mov ax, clutch_str
+            push ax
+            mov ax, 32
+            push ax
+            call printstr
+    
+display_stats:
+    ; Display final score
+    ; Row 13, Col 33: (13*160) + (33*2) = 2080 + 66 = 2146
+    mov ax, 1824              
+    push ax
+    mov ax, final_score_str
+    push ax
+    mov ax, 13
+    push ax
+    call printstr
+    
+    ; Score value at Col 46: 2080 + (46*2) = 2080 + 92 = 2172
+    mov ax, 1852              
+    push ax
+    push word[score]
+    call printnum
+    
+    ; Display lives remaining
+    ; Row 15, Col 35: (15*160) + (35*2) = 2400 + 70 = 2470
+    mov ax, 2150              
+    push ax
+    mov ax, hp_left_str
+    push ax
+    mov ax, 9
+    push ax
+    call printstr
+    
+    ; Lives value at Col 44: 2400 + (44*2) = 2400 + 88 = 2488
+    mov ax, 2168              
+    push ax
+    push word[live]
+    call printnum
+    
+    ; Display time taken
+    ; Row 17, Col 37: (17*160) + (37*2) = 2720 + 74 = 2794
+    mov ax, 2466              
+    push ax
+    mov ax, speedrun_str
+    push ax
+    mov ax, 6
+    push ax
+    call printstr
+    
+    ; Time value at Col 43: 2720 + (43*2) = 2720 + 86 = 2806
+    mov ax, 2478              
+    push ax
+    push word[second]
+    call printnum
+    
+    ; "sec" at Col 45: 2720 + (45*2) = 2720 + 90 = 2810
+    mov ax, 2484              
+    push ax
+    mov ax, secs_str
+    push ax
+    mov ax, 3
+    push ax
+    call printstr
+    
+    ; Display restart option (highlighted)
+    ; Row 20, Col 29: (20*160) + (29*2) = 3200 + 58 = 3258
+    mov ax, 3260              
+    push ax
+    mov ax, run_back_str
+    push ax
+    mov ax, 20
+    push ax
+    call printstr_B            
+    
+    ; Display quit option
+    ; Row 22, Col 33: (22*160) + (33*2) = 3520 + 66 = 3586
+    mov ax, 3584              
+    push ax
+    mov ax, rage_quit_str
+    push ax
+    mov ax, 14
+    push ax
+    call printstr_B
+    
+wait_input:
+    cmp byte[cs:restart], 1
+    je do_restart
+    cmp byte[cs:quit], 1
+    je go_quit
+    jmp wait_input
 
 go_quit:
-	pop ax
-	ret
-	
+    pop ax
+    ret
+    
 do_restart:
-	pop ax
-	mov word[second], 0
-	mov byte[clock], 0
-	mov byte[start_game], 1
-	mov word[total_bricks], 24
-	mov byte[live], 3
-	mov word[score], 0
-	mov byte[end_game], 0
-	mov word[bonus], 0
-	ret
+    ; Reset game variables
+    mov word[second], 0
+    mov byte[clock], 0
+    mov byte[start_game], 0      ; Important: reset this first
+    mov word[total_bricks], 24
+    mov byte[live], 3
+    mov word[score], 0
+    mov byte[end_game], 0        ; Clear end_game flag
+    mov word[bonus], 0
+    mov byte[solid], 0
+    mov byte[solid1], 0
+    mov word[pre_stack_pos], 3588
+    mov byte[StayOnStacker], 1
+    
+    ; Reset brick positions
+    ; [Add code to restore brick arrays to initial values]
+    
+    pop ax
+    ret
 
 		
 last_menu_display:

@@ -1494,7 +1494,7 @@ display_stats:
     push ax
     mov ax, rage_quit_str
     push ax
-    mov ax, 14
+    mov ax, 16
     push ax
     call printstr_B
     

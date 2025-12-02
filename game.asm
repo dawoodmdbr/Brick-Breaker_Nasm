@@ -24,14 +24,16 @@ bricks_start_location:
     dw 810, 828, 846, 864, 882, 900, 918, 936
     dw 1290, 1308, 1326, 1344, 1362, 1380, 1398, 1416
     dw 1770, 1788, 1806, 1824, 1842, 1860, 1878, 1896
+	dw 2250, 2268, 2286, 2304, 2322, 2340, 2358, 2376
 
 bricks_end_location:
     dw 822, 840, 858, 876, 894, 912, 930, 948
     dw 1302, 1320, 1338, 1356, 1374, 1392, 1410, 1428
     dw 1782, 1800, 1818, 1836, 1854, 1872, 1890, 1908
+	dw 2262, 2280, 2298, 2316, 2334, 2352, 2370, 2388
 
 score: dw 0
-total_bricks: dw 24
+total_bricks: dw 32
 calculated_location: dw 0
 left_limit: dw 0
 right_limit: dw 0
@@ -560,123 +562,138 @@ border:
 	ret
 
 brick_remove:
-	push es
-	push ax
-	push dx
-	push cx
-	push si
-	push bx
-	push di
-	mov ax, 0xb800
-	mov es, ax
-	mov cx, 24
-	mov si, 0
-	mov dx, [cs:calculated_location]
+    push es
+    push ax
+    push dx
+    push cx
+    push si
+    push bx
+    push di
+    mov ax, 0xb800
+    mov es, ax
+    mov cx, 32
+    mov si, 0
+    mov dx, [cs:calculated_location]
 check_brick_loop:
-	mov ax, word [cs:bricks_start_location + si]
-	mov bx, word [cs:bricks_end_location + si]
-	cmp ax, 0xFFFF
-	je skip_this_brick
-	cmp dx, ax
-	jb skip_this_brick
-	cmp dx, bx
-	ja skip_this_brick
-	jmp remove_this_brick
+    mov ax, word [cs:bricks_start_location + si]
+    mov bx, word [cs:bricks_end_location + si]
+    cmp ax, 0xFFFF
+    je skip_this_brick
+    cmp dx, ax
+    jb skip_this_brick
+    cmp dx, bx
+    ja skip_this_brick
+    jmp remove_this_brick
 skip_this_brick:
-	add si, 2
-	loop check_brick_loop
-	jmp end_brick_remove
+    add si, 2
+    loop check_brick_loop
+    jmp end_brick_remove
 remove_this_brick:
-	mov di, word [cs:bricks_start_location + si]
-	cmp di, 846
-	jne not_special_brick
-		mov byte [cs:solid], 1
-	not_special_brick:
-	push cx
-	mov cx, 6
-	mov ax, 0x0720
-	rep stosw
-	pop cx
-	mov word [cs:bricks_start_location + si], 0xFFFF
-	mov word [cs:bricks_end_location + si], 0xFFFF
-	call sound
-	add word [cs:score], 5
-	dec word [cs:total_bricks]
-	push ax
-	mov ax, 174
-	push ax
-	push word [cs:score]
-	call printnum
-	pop ax
+    mov di, word [cs:bricks_start_location + si]
+    cmp di, 846
+    jne not_special_brick
+        mov byte [cs:solid], 1
+    not_special_brick:
+    push cx
+    mov cx, 6
+    mov ax, 0x0720
+    rep stosw
+    pop cx
+    mov word [cs:bricks_start_location + si], 0xFFFF
+    mov word [cs:bricks_end_location + si], 0xFFFF
+    call sound
+    add word [cs:score], 5
+    dec word [cs:total_bricks]
+    push ax
+    mov ax, 174
+    push ax
+    push word [cs:score]
+    call printnum
+    pop ax
 end_brick_remove:
-	pop di
-	pop bx
-	pop si
-	pop cx
-	pop dx
-	pop ax
-	pop es
-	ret
+    pop di
+    pop bx
+    pop si
+    pop cx
+    pop dx
+    pop ax
+    pop es
+    ret
 
 bricks:
-	push es
-	push cx
-	push bx
-	push si
-	push di
-	mov ax, 0xb800
-	mov es, ax
-	mov si, 0
-	cld
+    push es
+    push cx
+    push bx
+    push si
+    push di
+    mov ax, 0xb800
+    mov es, ax
+    mov si, 0
+    cld
 row1_start:
-	mov di, 810
-	mov cx, 8
+    mov di, 810
+    mov cx, 8
 row1_loop:
-	push cx
-	mov ah, 0x10
-	mov al, 0x20
-	mov cx, 6
-	rep stosw
-	mov cx, 3
-	mov ax, 0x0720
-	rep stosw
-	pop cx
-	loop row1_loop
+    push cx
+    mov ah, 0x60
+    mov al, 0x20
+    mov cx, 6
+    rep stosw
+    mov cx, 3
+    mov ax, 0x0720
+    rep stosw
+    pop cx
+    loop row1_loop
 row2_start:
-	mov di, 1290
-	mov cx, 8
+    mov di, 1290
+    mov cx, 8
 row2_loop:
-	push cx
-	mov ah, 0x20
-	mov al, 0x20
-	mov cx, 6
-	rep stosw
-	mov cx, 3
-	mov ax, 0x0720
-	rep stosw
-	pop cx
-	loop row2_loop
+    push cx
+    mov ah, 0x20
+    mov al, 0x20
+    mov cx, 6
+    rep stosw
+    mov cx, 3
+    mov ax, 0x0720
+    rep stosw
+    pop cx
+    loop row2_loop
 row3_start:
-	mov di, 1770
-	mov cx, 8
+    mov di, 1770
+    mov cx, 8
 row3_loop:
-	push cx
-	mov ah, 0x30
-	mov al, 0x20
-	mov cx, 6
-	rep stosw
-	mov cx, 3
-	mov ax, 0x0720
-	rep stosw
-	pop cx
-	loop row3_loop
+    push cx
+    mov ah, 0x30
+    mov al, 0x20
+    mov cx, 6
+    rep stosw
+    mov cx, 3
+    mov ax, 0x0720
+    rep stosw
+    pop cx
+    loop row3_loop
+row4_start:
+    mov di, 2250
+    mov cx, 8
+row4_loop:
+    push cx
+    mov ah, 0x50
+    mov al, 0x20
+    mov cx, 6
+    rep stosw
+    mov cx, 3
+    mov ax, 0x0720
+    rep stosw
+    pop cx
+    loop row4_loop
+    
+    pop di
+    pop si
+    pop bx
+    pop cx
+    pop es
+    ret
 
-	pop di
-	pop si
-	pop bx
-	pop cx
-	pop es
-	ret
 
 clearStacker:
 	push bp
@@ -710,7 +727,7 @@ printStacker:
 	mov ax, 0xb800
 	mov es, ax
 	mov al, 0x20
-	mov ah, 0x70
+	mov ah, 0x10
 	mov cx, 15
 	mov di, [bp+4]
 	mov word[cs:left_limit], di
@@ -899,7 +916,7 @@ ball:
 	call nextposition
 	mov di, [cs:calculated_location]
 	mov ax, word[es:di]
-	cmp ah, 0x70
+	cmp ah, 0x10
 	je paddle_collision
 	cmp ah, 0x07
 	je R
@@ -1514,7 +1531,7 @@ do_restart:
     mov word[second], 0
     mov byte[clock], 0
     mov byte[start_game], 0      ; Important: reset this first
-    mov word[total_bricks], 24
+    mov word[total_bricks], 32
     mov byte[live], 3
     mov word[score], 0
     mov byte[end_game], 0        ; Clear end_game flag
